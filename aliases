@@ -1,0 +1,22 @@
+alias s="du -h --max-depth=1 | sort -h"
+alias ..="cd .."
+alias ll="exa -lga"
+alias lg="exa -lga --git"
+
+srv() {
+	if [ $# -eq 0 ]
+		then
+			php -S localhost:8000
+	else
+		php -S localhost:$1
+	fi
+}
+
+srvg() {
+	if [ $# -eq 0 ]
+		then
+			php -S 0.0.0.0:8000
+	else
+		php -S 0.0.0.0:$1
+	fi
+}

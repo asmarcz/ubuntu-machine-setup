@@ -1,0 +1,7 @@
+set tabstop=3
+set shiftwidth=3
+set relativenumber
+set number
+set autoindent
+set ruler
+set title
