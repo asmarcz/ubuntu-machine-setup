@@ -97,7 +97,7 @@ install_go() {
 	tar -C /usr/local -xzf $GO
 	rm $GO
 	IS=$(grep '#go-ubuntu-machine-setup' $HOME/.profile | wc -l)
-	if [[ "$IS" -eq 0 ]]
+	if [[ "$IS" -eq 0 ]]; then
 		echo 'export PATH=$PATH:/usr/local/go/bin #go-ubuntu-machine-setup' >> $HOME/.profile
 	fi
 }
