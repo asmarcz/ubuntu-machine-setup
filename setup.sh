@@ -99,8 +99,8 @@ install_go() {
 	IS=$(grep '#go-ubuntu-machine-setup' $HOME/.profile | wc -l)
 	if [[ "$IS" -eq 0 ]]; then
 		echo 'export PATH=$PATH:/usr/local/go/bin #go-ubuntu-machine-setup' >> $HOME/.profile
-		$GOPATH=$(/usr/local/go/bin/go env GOPATH)
-		echo 'export PATH=$PATH:'"$GOPATH"' #go-ubuntu-machine-setup' >> $HOME/.profile
+		GOPATH=$(/usr/local/go/bin/go env GOPATH)
+		echo 'export PATH=$PATH:'"$GOPATH"'/bin #go-ubuntu-machine-setup' >> $HOME/.profile
 	fi
 }
 
