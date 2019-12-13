@@ -87,6 +87,21 @@ install_vscode() {
 	rm $CODE
 }
 
+install_go() {
+	TEXT=$(wget -q -O - https://golang.org/dl/ | grep downloadBox | grep linux-amd64)
+	REGEX='href="(.+)"'
+	[[ $TEXT =~ $REGEX ]]
+	URL="${BASH_REMATCH[1]}"
+	GO=go
+	wget -O $GO "$URL"
+	tar -C /usr/local -xzf $GO
+	rm $GO
+	IS=$(grep '#go-ubuntu-machine-setup' $HOME/.profile | wc -l)
+	if [[ "$IS" -eq 0 ]]
+		echo 'export PATH=$PATH:/usr/local/go/bin #go-ubuntu-machine-setup' >> $HOME/.profile
+	fi
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
