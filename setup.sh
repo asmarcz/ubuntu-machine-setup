@@ -102,6 +102,10 @@ install_go() {
 	fi
 }
 
+install_libmagic() {
+	APT_ARRAY+=(libmagic-dev)
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
@@ -135,7 +139,7 @@ for EL in "${NAMES[@]}"; do
 	fi
 done
 
-if [ ${#a[@]} -gt 0 ]; then
+if [ ${#APT_ARRAY[@]} -gt 0 ]; then
 	apt update
 	apt install -y "${APT_ARRAY[@]}"
 fi
