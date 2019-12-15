@@ -96,11 +96,11 @@ install_go() {
 	wget -O $GO "$URL"
 	tar -C /usr/local -xzf $GO
 	rm $GO
-	IS=$(grep -c '#go-ubuntu-machine-setup' $HOME/.profile)
+	IS=$(grep -c '#go-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
-		echo 'export PATH=$PATH:/usr/local/go/bin #go-ubuntu-machine-setup' >> $HOME/.profile
+		echo 'export PATH=$PATH:/usr/local/go/bin #go-ubuntu-machine-setup' >> "$HOME"/.profile
 		GOPATH=$(/usr/local/go/bin/go env GOPATH)
-		echo 'export PATH=$PATH:'"$GOPATH"'/bin #go-ubuntu-machine-setup' >> $HOME/.profile
+		echo 'export PATH=$PATH:'"$GOPATH"'/bin #go-ubuntu-machine-setup' >> "$HOME"/.profile
 	fi
 }
 
