@@ -108,6 +108,10 @@ install_libmagic() {
 	APT_ARRAY+=(libmagic-dev)
 }
 
+install_shellcheck() {
+	APT_ARRAY+=(shellcheck)
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
@@ -119,11 +123,18 @@ SCRIPT_DIR=$(dirname "$0")
 declare -a APT_ARRAY
 
 declare -a NAMES
+YES=false
 if [[ $# -gt 0 ]]; then
-	for EL in $@; do
-		NAMES+=("$EL")
+	for EL in "$@"; do
+		if [[ "$EL" = '-y' ]]; then
+			YES=true
+		else
+			NAMES+=("$EL")
+		fi
 	done
-else	
+fi
+
+if [[ ( "$YES" = true ) && ( $# -eq 1 ) || ( $# -eq 0 ) ]]; then
 	REGEX="install_([a-zA-Z0-9]+)"
 	for EL in $(declare -f); do
 		if [[ $EL =~ $REGEX ]]; then
@@ -135,7 +146,11 @@ fi
 for EL in "${NAMES[@]}"; do
 	T=$(type -t "install_$EL")
 	if [[ "$T" = "function" ]]; then
-		ask "$EL"
+		if [[ "$YES" = true ]]; then
+			install_"$EL"
+		else
+			ask "$EL"
+		fi
 	else
 		echo "$EL is not currently supported."
 	fi
