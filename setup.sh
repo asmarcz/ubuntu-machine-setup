@@ -8,10 +8,10 @@ install_vim() {
 
 install_miniconda() {
 	MINICONDA=miniconda_installer
-	wget -O $MINICONDA "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+	wget -O $MINICONDA 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh'
 	bash $MINICONDA
 	rm $MINICONDA
-	echo ". ~/miniconda3/etc/profile.d/conda.sh" >> "$HOME"/.profile
+	echo '. ~/miniconda3/etc/profile.d/conda.sh' >> "$HOME"/.profile
 }
 
 RUST_INSTALLED=false
@@ -20,7 +20,7 @@ if [ -f "$HOME"/.cargo/bin/rustc ]; then
 fi
 install_rust() {
 	RUST=rust_installer
-	wget -O $RUST "https://sh.rustup.rs"
+	wget -O $RUST 'https://sh.rustup.rs'
 	bash $RUST
 	rm $RUST
 	RUSTUP=$HOME/.cargo/bin/rustup
@@ -37,7 +37,7 @@ install_bat() {
 	elif [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install bat
 	else
-		echo "Could not install bat. It is neither in apt repository nor Rust is installed." 1>&2
+		echo 'Could not install bat. It is neither in apt repository nor Rust is installed.' 1>&2
 	fi
 }
 
@@ -45,7 +45,7 @@ install_exa() {
 	if [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install exa
 	else
-		echo "Could not install exa. Rust is not installed." 1>&2
+		echo 'Could not install exa. Rust is not installed.' 1>&2
 	fi
 }
 
@@ -71,7 +71,7 @@ install_filezilla() {
 
 install_firefoxdev() {
 	FFDEV=ffdev
-	wget -O $FFDEV "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" 
+	wget -O $FFDEV 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US'
 	tar -xjvf $FFDEV -C /opt
 	mv /opt/firefox /opt/firefox_dev
 	chgrp -R "$SUDO_USER" /opt/firefox_dev
@@ -82,7 +82,7 @@ install_firefoxdev() {
 
 install_vscode() {
 	CODE=vscode
-	wget -O $CODE "https://go.microsoft.com/fwlink/?LinkID=760868"
+	wget -O $CODE 'https://go.microsoft.com/fwlink/?LinkID=760868'
 	dpkg -i $CODE
 	rm $CODE
 }
@@ -172,7 +172,7 @@ if [[ $# -gt 0 ]]; then
 fi
 
 if [[ ( "$YES" = true ) && ( $# -eq 1 ) || ( $# -eq 0 ) ]]; then
-	REGEX="install_([a-zA-Z0-9]+)"
+	REGEX='install_([a-zA-Z0-9]+)'
 	for EL in $(declare -F); do
 		if [[ $EL =~ $REGEX ]]; then
 			NAMES+=("${BASH_REMATCH[1]}")
@@ -182,7 +182,7 @@ fi
 
 for EL in "${NAMES[@]}"; do
 	T=$(type -t "install_$EL")
-	if [[ "$T" = "function" ]]; then
+	if [[ "$T" = 'function' ]]; then
 		if [[ "$YES" = true ]]; then
 			install_"$EL"
 		else
