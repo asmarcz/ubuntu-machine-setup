@@ -112,6 +112,43 @@ install_shellcheck() {
 	APT_ARRAY+=(shellcheck)
 }
 
+# installs latest LTS
+install_node() {	
+	REGEX='href="(latest-v([0-9]+).*)"'
+	MAX=0
+	SOURCE='https://nodejs.org/dist/'
+	while read -r L; do
+		[[ "$L" =~ $REGEX ]]
+		if [[ "${#BASH_REMATCH[@]}" -eq 3 ]]; then
+			#echo "${BASH_REMATCH[@]}"
+			if [[ "${BASH_REMATCH[2]}" -gt $MAX && $(("${BASH_REMATCH[2]}" % 2)) -eq 0 ]]; then
+				MAX="${BASH_REMATCH[2]}"
+				BASE_URL="${BASH_REMATCH[1]}"
+			fi
+		fi
+	done <<< "$(wget -q -O - $SOURCE)"
+	
+	COMPLETE="$(wget -q -O - "$SOURCE$BASE_URL" | grep linux-x64 | grep xz)"
+	REGEX='href="(.+)"'
+	[[ "$COMPLETE" =~ $REGEX ]]
+	ARCHIVE="${BASH_REMATCH[1]}"
+	
+	URL="$SOURCE$BASE_URL$ARCHIVE"
+	NODE=node
+	wget -O $NODE "$URL"
+	tar -xJf $NODE -C /opt
+	rm $NODE
+
+	REGEX='(.+)\.tar\.xz'
+	[[ "$ARCHIVE" =~ $REGEX ]]
+	mv /opt/"${BASH_REMATCH[1]}" /opt/node
+
+	IS=$(grep -c '#node-ubuntu-machine-setup' "$HOME"/.profile)
+	if [[ "$IS" -eq 0 ]]; then
+		echo 'export PATH=$PATH:/opt/node/bin #node-ubuntu-machine-setup' >> "$HOME"/.profile
+	fi
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
