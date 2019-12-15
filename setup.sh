@@ -149,6 +149,11 @@ install_node() {
 	fi
 }
 
+install_nextcloud() {
+	add-apt-repository ppa:nextcloud-devs/client
+	APT_ARRAY+=(nextcloud-client)
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
