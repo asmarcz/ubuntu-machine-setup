@@ -136,7 +136,7 @@ fi
 
 if [[ ( "$YES" = true ) && ( $# -eq 1 ) || ( $# -eq 0 ) ]]; then
 	REGEX="install_([a-zA-Z0-9]+)"
-	for EL in $(declare -f); do
+	for EL in $(declare -F); do
 		if [[ $EL =~ $REGEX ]]; then
 			NAMES+=("${BASH_REMATCH[1]}")
 		fi
