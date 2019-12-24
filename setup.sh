@@ -7,7 +7,7 @@ install_vim() {
 }
 
 install_miniconda() {
-	MINICONDA=miniconda_installer
+	MINICONDA=miniconda_installer$SEED
 	wget -O $MINICONDA 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh'
 	bash $MINICONDA
 	rm $MINICONDA
@@ -19,7 +19,7 @@ if [ -f "$HOME"/.cargo/bin/rustc ]; then
 	RUST_INSTALLED=true
 fi
 install_rust() {
-	RUST=rust_installer
+	RUST=rust_installer$SEED
 	wget -O $RUST 'https://sh.rustup.rs'
 	bash $RUST
 	rm $RUST
@@ -70,7 +70,7 @@ install_filezilla() {
 }
 
 install_firefoxdev() {
-	FFDEV=ffdev
+	FFDEV=ffdev$SEED
 	wget -O $FFDEV 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US'
 	tar -xjvf $FFDEV -C /opt
 	mv /opt/firefox /opt/firefox_dev
@@ -81,7 +81,7 @@ install_firefoxdev() {
 }
 
 install_vscode() {
-	CODE=vscode
+	CODE=vscode$SEED
 	wget -O $CODE 'https://go.microsoft.com/fwlink/?LinkID=760868'
 	dpkg -i $CODE
 	rm $CODE
@@ -92,7 +92,7 @@ install_go() {
 	REGEX='href="(.+)"'
 	[[ $TEXT =~ $REGEX ]]
 	URL="${BASH_REMATCH[1]}"
-	GO=go
+	GO=go$SEED
 	wget -O $GO "$URL"
 	tar -C /usr/local -xzf $GO
 	rm $GO
@@ -134,7 +134,7 @@ install_node() {
 	ARCHIVE="${BASH_REMATCH[1]}"
 	
 	URL="$SOURCE$BASE_URL$ARCHIVE"
-	NODE=node
+	NODE=node$SEED
 	wget -O $NODE "$URL"
 	tar -xJf $NODE -C /opt
 	rm $NODE
@@ -160,6 +160,8 @@ ask() {
 		install_"$1"
 	fi
 }
+
+SEED=${RANDOM:0:4}
 
 SCRIPT_DIR=$(dirname "$0")
 declare -a APT_ARRAY
