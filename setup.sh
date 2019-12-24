@@ -168,10 +168,13 @@ declare -a APT_ARRAY
 
 declare -a NAMES
 YES=false
+BELL=false
 if [[ $# -gt 0 ]]; then
 	for EL in "$@"; do
 		if [[ "$EL" = '-y' ]]; then
 			YES=true
+		elif [[ "$EL" = '-b' ]]; then
+			BELL=true
 		else
 			NAMES+=("$EL")
 		fi
@@ -194,6 +197,9 @@ for EL in "${NAMES[@]}"; do
 			install_"$EL"
 		else
 			ask "$EL"
+			if [[ "$BELL" = true ]]; then
+				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
+			fi
 		fi
 	else
 		echo "$EL is not currently supported."
