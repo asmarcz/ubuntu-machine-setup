@@ -11,7 +11,11 @@ install_miniconda() {
 	wget -O $MINICONDA 'https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh'
 	bash $MINICONDA
 	rm $MINICONDA
-	echo '. ~/miniconda3/etc/profile.d/conda.sh' >> "$HOME"/.profile
+	IS=$(grep -c '#miniconda-ubuntu-machine-setup' "$HOME"/.profile)
+	if [[ "$IS" -eq 0 ]]; then
+		echo 'export PATH="/home/asmar/miniconda3/bin:$PATH" #miniconda-ubuntu-machine-setup' >> "$HOME"/.profile
+		echo '. ~/miniconda3/etc/profile.d/conda.sh #miniconda-ubuntu-machine-setup' >> "$HOME"/.bashrc
+	fi
 }
 
 RUST_INSTALLED=false
