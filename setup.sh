@@ -30,9 +30,14 @@ install_pyenv() {
 	curl https://pyenv.run | bash
 	IS=$(grep -c '#pyenv-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
-		echo 'export PATH="'"$HOME"'/.pyenv/bin:$PATH" #pyenv-ubuntu-machine-setup' >> "$HOME"/.profile
-		echo 'eval "$(pyenv init -)"' >> "$HOME"/.bashrc
-		echo 'eval "$(pyenv virtualenv-init -)"' >> "$HOME"/.bashrc
+		echo 'export PATH="$HOME/.pyenv/bin:$HOME/.pyenv/shims:$PATH" #pyenv-ubuntu-machine-setup' >> "$HOME"/.profile
+		echo 'pyenv rehash' >> "$HOME"/.profile
+		printf 'init_pyenv() {\n\teval "$(pyenv init -)"\n' >> "$HOME"/.bashrc
+		printf '\teval "$(pyenv virtualenv-init -)"\n}\n' >> "$HOME"/.bashrc
+		read -rp 'Do you want to initialize pyenv automatically? [y/n] ' YN
+		if [ "$YN" != "n" ]; then
+			echo 'init_pyenv' >> "$HOME"/.bashrc
+		fi
 	fi
 
 }
