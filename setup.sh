@@ -24,6 +24,19 @@ install_miniconda() {
 	fi
 }
 
+install_pyenv() {
+	# https://github.com/pyenv/pyenv/wiki/Common-build-problems 
+	apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+	curl https://pyenv.run | bash
+	IS=$(grep -c '#pyenv-ubuntu-machine-setup' "$HOME"/.profile)
+	if [[ "$IS" -eq 0 ]]; then
+		echo 'export PATH="'"$HOME"'/.pyenv/bin:$PATH" #pyenv-ubuntu-machine-setup' >> "$HOME"/.profile
+		echo 'eval "$(pyenv init -)"' >> "$HOME"/.bashrc
+		echo 'eval "$(pyenv virtualenv-init -)"' >> "$HOME"/.bashrc
+	fi
+
+}
+
 RUST_INSTALLED=false
 if [ -f "$HOME"/.cargo/bin/rustc ]; then
 	RUST_INSTALLED=true
