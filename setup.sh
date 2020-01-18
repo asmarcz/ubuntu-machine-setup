@@ -14,7 +14,13 @@ install_miniconda() {
 	IS=$(grep -c '#miniconda-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
 		echo 'export PATH="/home/asmar/miniconda3/bin:$PATH" #miniconda-ubuntu-machine-setup' >> "$HOME"/.profile
+		printf 'init_conda() {\n\t' >> "$HOME"/.bashrc
 		echo '. ~/miniconda3/etc/profile.d/conda.sh #miniconda-ubuntu-machine-setup' >> "$HOME"/.bashrc
+		echo '}' >> "$HOME"/.bashrc
+		read -rp 'Do you want to initialize conda automatically? [y/n] ' YN
+		if [ "$YN" != "n" ]; then
+			echo 'init_conda' >> "$HOME"/.bashrc
+		fi
 	fi
 }
 
