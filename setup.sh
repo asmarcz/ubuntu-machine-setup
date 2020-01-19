@@ -206,25 +206,38 @@ declare -a APT_ARRAY
 declare -a NAMES
 YES=false
 BELL=false
+SHOWALL=false
 if [[ $# -gt 0 ]]; then
 	for EL in "$@"; do
 		if [[ "$EL" = '-y' ]]; then
 			YES=true
 		elif [[ "$EL" = '-b' ]]; then
 			BELL=true
+		elif [[ "$EL" = '--show-all' ]]; then
+			SHOWALL=true
 		else
 			NAMES+=("$EL")
 		fi
 	done
 fi
 
-if [[ ( "$YES" = true ) && ( $# -eq 1 ) || ( $# -eq 0 ) ]]; then
+populate_names() {
 	REGEX='install_([a-zA-Z0-9]+)'
 	for EL in $(declare -F); do
 		if [[ $EL =~ $REGEX ]]; then
 			NAMES+=("${BASH_REMATCH[1]}")
 		fi
 	done
+}
+
+if [[ "$SHOWALL" = true ]]; then
+populate_names
+	for TOOL in "${NAMES[@]}"; do
+		echo "$TOOL"
+	done
+	exit 0
+elif [[ "${#NAMES[@]}" -eq 0 ]]; then
+	populate_names
 fi
 
 for EL in "${NAMES[@]}"; do
