@@ -86,6 +86,13 @@ install_yourToolOfChoice() {
 ...
 ```
 
+You can also use `APT_ARRAY` to have packages installed by apt at the very end of `script.sh`.
+```
+install_yourToolOfChoice() {
+	APT_ARRAY+=(package-in-repository)
+}
+```
+
 
 # License
 
