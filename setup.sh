@@ -182,6 +182,15 @@ install_nextcloud() {
 	APT_ARRAY+=(nextcloud-client)
 }
 
+install_qterminal() {
+	APT_ARRAY+=(qterminal)
+	mkdir -p "$HOME"/.config/qterminal.org/color-schemes
+	cp "$SCRIPT_DIR"/qterminal/*.schema "$HOME"/.config/qterminal.org/color-schemes
+	cp "$SCRIPT_DIR"/qterminal/*.colorscheme "$HOME"/.config/qterminal.org/color-schemes
+	cp "$SCRIPT_DIR"/qterminal/qterminal.ini "$HOME"/.config/qterminal.org
+	chown -R "$SUDO_USER":"$SUDO_USER" "$HOME"/.config/qterminal.org
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then

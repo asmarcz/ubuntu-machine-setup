@@ -2,6 +2,7 @@ alias s="du -h --max-depth=1 | sort -h"
 alias ..="cd .."
 alias ll="exa -lga"
 alias lg="exa -lga --git"
+alias bat="bat --theme=ansi-light"
 
 srv() {
 	if [ $# -eq 0 ]
