@@ -5,3 +5,4 @@ set number
 set autoindent
 set ruler
 set title
+set background=light
