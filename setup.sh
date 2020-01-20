@@ -148,7 +148,6 @@ install_node() {
 	while read -r L; do
 		[[ "$L" =~ $REGEX ]]
 		if [[ "${#BASH_REMATCH[@]}" -eq 3 ]]; then
-			#echo "${BASH_REMATCH[@]}"
 			if [[ "${BASH_REMATCH[2]}" -gt $MAX && $(("${BASH_REMATCH[2]}" % 2)) -eq 0 ]]; then
 				MAX="${BASH_REMATCH[2]}"
 				BASE_URL="${BASH_REMATCH[1]}"
@@ -170,6 +169,7 @@ install_node() {
 	REGEX='(.+)\.tar\.xz'
 	[[ "$ARCHIVE" =~ $REGEX ]]
 	mv /opt/"${BASH_REMATCH[1]}" /opt/node
+	chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
 
 	IS=$(grep -c '#node-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
