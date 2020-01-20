@@ -240,6 +240,11 @@ elif [[ "${#NAMES[@]}" -eq 0 ]]; then
 	populate_names
 fi
 
+if [[ "$(id -u)" -ne 0 ]]; then
+	echo 'You need to run this script with root privileges.' 1>&2
+	exit 1
+fi
+
 for EL in "${NAMES[@]}"; do
 	T=$(type -t "install_$EL")
 	if [[ "$T" = 'function' ]]; then
