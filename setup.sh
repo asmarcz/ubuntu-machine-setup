@@ -191,6 +191,24 @@ install_qterminal() {
 	chown -R "$SUDO_USER":"$SUDO_USER" "$HOME"/.config/qterminal.org
 }
 
+install_jetbrainsmono() {
+	REGEX='download.jetbrains.com/fonts/[a-zA-Z0-9.-]*'
+	SOURCE='https://www.jetbrains.com/lp/mono/'
+	while read -r L; do
+		[[ "$L" =~ $REGEX ]]
+		if [[ -n "${BASH_REMATCH[0]}" ]]; then
+			URL="${BASH_REMATCH[0]}"
+			break
+		fi
+	done <<< "$(wget -q -O - $SOURCE)"
+	$JBMONO=jbmono$SEED
+	wget -O $JBMONO "$URL"
+	mkdir -p "$HOME"/.fonts
+	unzip -d "$HOME"/.fonts $JBMONO
+	fc-cache -f -v
+	rm $JBMONO
+}
+
 ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
