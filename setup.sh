@@ -26,7 +26,10 @@ install_miniconda() {
 
 install_pyenv() {
 	# https://github.com/pyenv/pyenv/wiki/Common-build-problems 
-	apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+	APT_ARRAY+=(make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git)
+}
+
+afterapt_pyenv() {
 	curl https://pyenv.run | bash
 	IS=$(grep -c '#pyenv-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -39,7 +42,6 @@ install_pyenv() {
 			echo 'init_pyenv' >> "$HOME"/.bashrc
 		fi
 	fi
-
 }
 
 RUST_INSTALLED=false
@@ -283,3 +285,10 @@ if [ ${#APT_ARRAY[@]} -gt 0 ]; then
 	apt update
 	apt install -y "${APT_ARRAY[@]}"
 fi
+
+for EL in "${NAMES[@]}"; do
+	T=$(type -t "afterapt_$EL")
+	if [[ "$T" = 'function' ]]; then
+		afterapt_"$EL"
+	fi
+done
