@@ -1,8 +1,11 @@
 #!/bin/bash
 HOME=/home/$SUDO_USER
 
-install_vim() {
+dependency_vim() {
 	APT_ARRAY+=(vim-gtk3)
+}
+
+install_vim() {
 	cat "$SCRIPT_DIR"/vim_config >> "$HOME"/.vimrc
 }
 
@@ -24,12 +27,12 @@ install_miniconda() {
 	fi
 }
 
-install_pyenv() {
+dependency_pyenv() {
 	# https://github.com/pyenv/pyenv/wiki/Common-build-problems 
 	APT_ARRAY+=(make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git)
 }
 
-afterapt_pyenv() {
+install_pyenv() {
 	curl https://pyenv.run | bash
 	IS=$(grep -c '#pyenv-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -63,7 +66,7 @@ install_rust() {
 install_bat() {
 	IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
 	if [ "$IS_APT" -eq 1 ]; then
-		APT_ARRAY+=(bat)
+		apt install -y bat
 	elif [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install bat
 	else
@@ -71,19 +74,21 @@ install_bat() {
 	fi
 }
 
-install_exa() {
-	if [ "$RUST_INSTALLED" = true ]; then
-		"$HOME"/.cargo/bin/cargo install exa
-	else
-		echo 'Could not install exa. Rust is not installed.' 1>&2
+dependency_exa() {
+	if [[ "$RUST_INSTALLED" = false ]]; then
+		register_dependency exa rust
 	fi
 }
 
-install_clang() {
+install_exa() {
+	"$HOME"/.cargo/bin/cargo install exa
+}
+
+dependency_clang() {
 	APT_ARRAY+=(clang make)
 }
 
-install_git() {
+dependency_git() {
 	APT_ARRAY+=(git)
 }
 
@@ -91,11 +96,11 @@ install_aliases() {
 	cat "$SCRIPT_DIR"/aliases >> "$HOME"/.bashrc
 }
 
-install_php() {
+dependency_php() {
 	APT_ARRAY+=(php-pear php-fpm php-dev php-zip php-curl php-xmlrpc php-gd php-mysql php-pgsql php-mbstring php-xml)
 }
 
-install_filezilla() {
+dependency_filezilla() {
 	APT_ARRAY+=(filezilla)
 }
 
@@ -134,11 +139,11 @@ install_go() {
 	fi
 }
 
-install_libmagic() {
+dependency_libmagic() {
 	APT_ARRAY+=(libmagic-dev)
 }
 
-install_shellcheck() {
+dependency_shellcheck() {
 	APT_ARRAY+=(shellcheck)
 }
 
@@ -179,13 +184,16 @@ install_node() {
 	fi
 }
 
-install_nextcloud() {
+dependency_nextcloud() {
 	add-apt-repository ppa:nextcloud-devs/client
 	APT_ARRAY+=(nextcloud-client)
 }
 
-install_qterminal() {
+dependency_qterminal() {
 	APT_ARRAY+=(qterminal)
+}
+
+install_qterminal() {
 	mkdir -p "$HOME"/.config/qterminal.org/color-schemes
 	cp "$SCRIPT_DIR"/qterminal/*.schema "$HOME"/.config/qterminal.org/color-schemes
 	cp "$SCRIPT_DIR"/qterminal/*.colorscheme "$HOME"/.config/qterminal.org/color-schemes
@@ -203,7 +211,7 @@ install_jetbrainsmono() {
 			break
 		fi
 	done <<< "$(wget -q -O - $SOURCE)"
-	$JBMONO=jbmono$SEED
+	JBMONO=jbmono$SEED
 	wget -O $JBMONO "$URL"
 	mkdir -p "$HOME"/.fonts
 	unzip -d "$HOME"/.fonts $JBMONO
@@ -215,6 +223,15 @@ ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
 		install_"$1"
+		FULLFILLED[$(get_names_index "$EL")]=true
+	fi
+}
+
+ask_dep() {
+	read -rp "Install $1? [y/n] " YN
+	if [[ "$YN" != "n" ]]; then
+		dependency_"$1"
+		FULLFILLED_DEP[$(get_names_index "$EL")]=true
 	fi
 }
 
@@ -241,17 +258,35 @@ if [[ $# -gt 0 ]]; then
 	done
 fi
 
+get_names_index() {
+	local RET=-1
+	for (( I = 0; I < ${#NAMES[@]}; I++ )); do
+		if [[ "${NAMES[$I]}" = "$1" ]]; then
+			RET=$I
+			break
+		fi
+	done
+	echo $RET
+}
+
 populate_names() {
-	REGEX='install_([a-zA-Z0-9]+)'
+	INSTALL_REGEX='install_([a-zA-Z0-9]+)'
+	DEPENDENCY_REGEX='dependency_([a-zA-Z0-9]+)'
 	for EL in $(declare -F); do
-		if [[ $EL =~ $REGEX ]]; then
-			NAMES+=("${BASH_REMATCH[1]}")
+		if [[ "$EL" =~ $INSTALL_REGEX ]]; then
+			if [[ "$(get_names_index ${BASH_REMATCH[1]})" -eq -1 ]]; then
+				NAMES+=("${BASH_REMATCH[1]}")
+			fi
+		elif [[ "$EL" =~ $DEPENDENCY_REGEX ]]; then
+			if [[ "$(get_names_index ${BASH_REMATCH[1]})" -eq -1 ]]; then
+				NAMES+=("${BASH_REMATCH[1]}")
+			fi
 		fi
 	done
 }
 
 if [[ "$SHOWALL" = true ]]; then
-populate_names
+	populate_names
 	for TOOL in "${NAMES[@]}"; do
 		echo "$TOOL"
 	done
@@ -265,30 +300,90 @@ if [[ "$(id -u)" -ne 0 ]]; then
 	exit 1
 fi
 
-for EL in "${NAMES[@]}"; do
-	T=$(type -t "install_$EL")
-	if [[ "$T" = 'function' ]]; then
-		if [[ "$YES" = true ]]; then
-			install_"$EL"
-		else
-			ask "$EL"
-			if [[ "$BELL" = true ]]; then
-				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
-			fi
-		fi
-	else
-		echo "$EL is not currently supported."
-	fi
+declare -a FULLFILLED_DEP
+declare -a FULLFILLED
+declare -a DEPENDENCIES
+
+for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+	FULLFILLED_DEP[$I]=false
+	FULLFILLED[$I]=false
+	DEPENDENCIES[$I]=-1
 done
 
-if [ ${#APT_ARRAY[@]} -gt 0 ]; then
+register_dependency() {
+	local DEP
+	DEP=$(get_names_index "$2")
+	if [[ "$DEP" -eq -1 ]]; then
+		DEP="${#NAMES[@]}"
+		NAMES+=("$2")
+		FULLFILLED_DEP+=(false)
+		FULLFILLED+=(false)
+		DEPENDENCIES+=(-1)
+	fi
+	DEPENDENCIES[$(get_names_index "$1")]="$DEP"
+}
+
+go_through_dependencies() {
+	local RAN=false
+	for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+		EL="${NAMES[$I]}"
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false ]]; then
+			if [[ "$YES" = true ]]; then
+				dependency_"$EL"
+				FULLFILLED_DEP[$I]=true
+			else
+				ask_dep "$EL"
+			fi
+			RAN=true
+		fi
+	done
+	if [[ "$RAN" = true ]]; then
+		go_through_dependencies # causes infinite loop when user declines dependency
+	fi
+}
+
+go_through_dependencies
+
+if [[ ${#APT_ARRAY[@]} -gt 0 ]]; then
 	apt update
 	apt install -y "${APT_ARRAY[@]}"
 fi
 
-for EL in "${NAMES[@]}"; do
-	T=$(type -t "afterapt_$EL")
+process() {
+	local I="$1"
+	local EL="${NAMES[$I]}"
+	if [[ "${FULLFILLED[$I]}" = false ]]; then
+		if [[ "${DEPENDENCIES[$I]}" -ne -1 ]]; then
+			echo "Installing dependency ${NAMES[${DEPENDENCIES[$I]}]} for $EL."
+			process "${DEPENDENCIES[$I]}"
+		fi
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = true || "$T" != 'function' ]]; then
+			if [[ "$YES" = true || "${FULLFILLED_DEP[$I]}" = true ]]; then
+				install_"$EL"
+				FULLFILLED[$I]=true
+			else
+				ask "$EL"
+			fi
+			if [[ "$BELL" = true ]]; then
+				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
+			fi
+		elif [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false ]]; then
+			echo "Could not install $EL. Dependencies were not fullfilled or user declined." 1>&2
+		fi
+	fi
+}
+
+for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+	EL="${NAMES[$I]}"
+	T=$(type -t "install_$EL")
 	if [[ "$T" = 'function' ]]; then
-		afterapt_"$EL"
+		process $I
+	else
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" != 'function' ]]; then
+			echo "$EL is not currently supported."
+		fi
 	fi
 done
