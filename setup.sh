@@ -203,7 +203,7 @@ install_jetbrainsmono() {
 			break
 		fi
 	done <<< "$(wget -q -O - $SOURCE)"
-	$JBMONO=jbmono$SEED
+	JBMONO=jbmono$SEED
 	wget -O $JBMONO "$URL"
 	mkdir -p "$HOME"/.fonts
 	unzip -d "$HOME"/.fonts $JBMONO
