@@ -233,7 +233,7 @@ ask_dep() {
 		dependency_"$1"
 		FULLFILLED_DEP[$(get_names_index "$EL")]=true
 	else
-		DECLINED[$(get_names_index "$EL")]=true
+		DECLINED_DEP[$(get_names_index "$EL")]=true
 	fi
 }
 
@@ -305,7 +305,7 @@ fi
 declare -a FULLFILLED_DEP
 declare -a FULLFILLED
 declare -a DEPENDENCIES
-declare -a DECLINED
+declare -a DECLINED_DEP
 
 for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
 	FULLFILLED_DEP[$I]=false
@@ -374,8 +374,6 @@ process() {
 			if [[ "$BELL" = true ]]; then
 				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
 			fi
-		elif [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false ]]; then
-			echo "Could not install $EL. Dependencies were not fullfilled or user declined." 1>&2
 		fi
 	fi
 }
