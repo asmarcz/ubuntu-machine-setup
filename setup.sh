@@ -232,6 +232,8 @@ ask_dep() {
 	if [[ "$YN" != "n" ]]; then
 		dependency_"$1"
 		FULLFILLED_DEP[$(get_names_index "$EL")]=true
+	else
+		DECLINED[$(get_names_index "$EL")]=true
 	fi
 }
 
@@ -303,11 +305,13 @@ fi
 declare -a FULLFILLED_DEP
 declare -a FULLFILLED
 declare -a DEPENDENCIES
+declare -a DECLINED
 
 for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
 	FULLFILLED_DEP[$I]=false
 	FULLFILLED[$I]=false
 	DEPENDENCIES[$I]=-1
+	DECLINED_DEP[$I]=false
 done
 
 register_dependency() {
@@ -319,6 +323,7 @@ register_dependency() {
 		FULLFILLED_DEP+=(false)
 		FULLFILLED+=(false)
 		DEPENDENCIES+=(-1)
+		DECLINED_DEP+=(false)
 	fi
 	DEPENDENCIES[$(get_names_index "$1")]="$DEP"
 }
@@ -328,7 +333,7 @@ go_through_dependencies() {
 	for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
 		EL="${NAMES[$I]}"
 		T=$(type -t "dependency_$EL")
-		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false ]]; then
+		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false && "${DECLINED_DEP[$I]}" = false ]]; then
 			if [[ "$YES" = true ]]; then
 				dependency_"$EL"
 				FULLFILLED_DEP[$I]=true
@@ -339,7 +344,7 @@ go_through_dependencies() {
 		fi
 	done
 	if [[ "$RAN" = true ]]; then
-		go_through_dependencies # causes infinite loop when user declines dependency
+		go_through_dependencies
 	fi
 }
 
