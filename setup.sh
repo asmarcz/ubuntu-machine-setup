@@ -1,5 +1,4 @@
 #!/bin/bash
-HOME=/home/$SUDO_USER
 
 dependency_vim() {
 	APT_ARRAY+=(vim-gtk3)
@@ -66,7 +65,7 @@ install_rust() {
 install_bat() {
 	IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
 	if [ "$IS_APT" -eq 1 ]; then
-		apt install -y bat
+		sudo apt install -y bat
 	elif [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install bat
 	else
@@ -107,10 +106,11 @@ dependency_filezilla() {
 install_firefoxdev() {
 	FFDEV=ffdev$SEED
 	wget -O $FFDEV 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US'
-	tar -xjvf $FFDEV -C /opt
-	mv /opt/firefox /opt/firefox_dev
-	chgrp -R "$SUDO_USER" /opt/firefox_dev
-	chmod -R g+rwx /opt/firefox_dev
+	sudo tar -xjvf $FFDEV -C /opt
+	sudo mv /opt/firefox /opt/firefox_dev
+	sudo chgrp -R "$SUDO_USER" /opt/firefox_dev
+	sudo chmod -R g+rwx /opt/firefox_dev
+	mkdir "$HOME"/.local/share/applications
 	cp "$SCRIPT_DIR"/firefox_dev.desktop "$HOME"/.local/share/applications
 	rm $FFDEV
 }
@@ -118,7 +118,7 @@ install_firefoxdev() {
 install_vscode() {
 	CODE=vscode$SEED
 	wget -O $CODE 'https://go.microsoft.com/fwlink/?LinkID=760868'
-	dpkg -i $CODE
+	sudo dpkg -i $CODE
 	rm $CODE
 }
 
@@ -129,7 +129,7 @@ install_go() {
 	URL="${BASH_REMATCH[1]}"
 	GO=go$SEED
 	wget -O $GO "$URL"
-	tar -C /usr/local -xzf $GO
+	sudo tar -C /usr/local -xzf $GO
 	rm $GO
 	IS=$(grep -c '#go-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -170,13 +170,13 @@ install_node() {
 	URL="$SOURCE$BASE_URL$ARCHIVE"
 	NODE=node$SEED
 	wget -O $NODE "$URL"
-	tar -xJf $NODE -C /opt
+	sudo tar -xJf $NODE -C /opt
 	rm $NODE
 
 	REGEX='(.+)\.tar\.xz'
 	[[ "$ARCHIVE" =~ $REGEX ]]
-	mv /opt/"${BASH_REMATCH[1]}" /opt/node
-	chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
+	sudo mv /opt/"${BASH_REMATCH[1]}" /opt/node
+	sudo chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
 
 	IS=$(grep -c '#node-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -195,10 +195,16 @@ dependency_qterminal() {
 
 install_qterminal() {
 	mkdir -p "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/*.schema "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/*.colorscheme "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/qterminal.ini "$HOME"/.config/qterminal.org
-	chown -R "$SUDO_USER":"$SUDO_USER" "$HOME"/.config/qterminal.org
+	local FILE SRC DEST
+	SRC="$SCRIPT_DIR"/qterminal
+	DEST="$HOME"/.config/qterminal.org
+	for FILE in "$SRC"/*.schema; do
+		cp "$FILE" "$DEST"/color-schemes
+	done
+	for FILE in "$SRC"/*.colorscheme; do
+		cp "$FILE" "$DEST"/color-schemes
+	done
+	cp "$SRC"/qterminal.ini "$DEST"
 }
 
 install_jetbrainsmono() {
@@ -297,11 +303,6 @@ elif [[ "${#NAMES[@]}" -eq 0 ]]; then
 	populate_names
 fi
 
-if [[ "$(id -u)" -ne 0 ]]; then
-	echo 'You need to run this script with root privileges.' 1>&2
-	exit 1
-fi
-
 declare -a FULLFILLED_DEP
 declare -a FULLFILLED
 declare -a DEPENDENCIES
@@ -351,9 +352,11 @@ go_through_dependencies() {
 go_through_dependencies
 
 if [[ ${#APT_ARRAY[@]} -gt 0 ]]; then
-	apt update
-	apt install -y "${APT_ARRAY[@]}"
+	sudo apt update
+	sudo apt install -y "${APT_ARRAY[@]}"
 fi
+
+BELL_FILE='/usr/share/sounds/freedesktop/stereo/complete.oga'
 
 process() {
 	local I="$1"
@@ -372,7 +375,9 @@ process() {
 				ask "$EL"
 			fi
 			if [[ "$BELL" = true ]]; then
-				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
+				if [[ -f "$BELL_FILE" ]]; then
+					paplay "$BELL_FILE"
+				fi
 			fi
 		fi
 	fi
