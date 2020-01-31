@@ -198,13 +198,9 @@ install_qterminal() {
 	local FILE SRC DEST
 	SRC="$SCRIPT_DIR"/qterminal
 	DEST="$HOME"/.config/qterminal.org
-	for FILE in "$SRC"/*.schema; do
-		cp "$FILE" "$DEST"/color-schemes
-	done
-	for FILE in "$SRC"/*.colorscheme; do
-		cp "$FILE" "$DEST"/color-schemes
-	done
-	cp "$SRC"/qterminal.ini "$DEST"
+	cp "$SRC"/*.schema "$DEST"/color-schemes 2>/dev/null || :
+	cp "$SRC"/*.colorscheme "$DEST"/color-schemes 2>/dev/null || :
+	cp "$SRC"/qterminal.ini "$DEST" 2>/dev/null || :
 }
 
 install_jetbrainsmono() {
