@@ -111,7 +111,7 @@ install_firefoxdev() {
 	sudo mv /opt/firefox /opt/firefox_dev
 	sudo chgrp -R "$SUDO_USER" /opt/firefox_dev
 	sudo chmod -R g+rwx /opt/firefox_dev
-	mkdir "$HOME"/.local/share/applications
+	mkdir -p "$HOME"/.local/share/applications
 	cp "$SCRIPT_DIR"/firefox_dev.desktop "$HOME"/.local/share/applications
 	rm $FFDEV
 }
