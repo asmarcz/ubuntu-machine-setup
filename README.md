@@ -1,11 +1,22 @@
-# About
+# Contents
+- [About](#about)
+- [Usage](#usage)
+- [Options](#options)
+- [Notes](#notes)
+	- [Miniconda](#notes_miniconda)
+	- [pyenv](#notes_pyenv)
+	- [Node.js](#notes_nodejs)
+- [Extending](#extending)
+- [License](#license)
+
+# <a name="about"></a> About
 
 This script is what I've built while installing the stuff my friends and I use on my secondary machine. It is meant to quickly install all of the tools after clean Ubuntu-based-something install.
 
 It may not suit your needs. Some of the things rely on default configuration/expected way of use.
 
 
-# Usage
+# <a name="usage"></a> Usage
 
 ```
 git clone --depth=1 https://github.com/asmarcz/ubuntu-machine-setup
@@ -34,7 +45,7 @@ Install firefoxdev? [y/n]
 ...
 ```
 
-## Options
+## <a name="options"></a> Options
 Append `-y` flag to skip prompts. Install everything available:
 ```
 $ ./setup.sh -y
@@ -56,12 +67,12 @@ bat
 ```
 
 
-# Notes
+# <a name="notes"></a> Notes
 
-## Miniconda
+## <a name="notes_miniconda"></a> Miniconda
 If you choose not to initialize conda automatically you will need to run `init_conda` in order to use it. I usually disable it because I am sick of how slow it is to initialize.
 
-## pyenv
+## <a name="notes_pyenv"></a> pyenv
 The same as Miniconda. You will need to run `init_pyenv`. However pyenv will work even if you disable it. After installing it you would do:
 ```
 $ pyenv install 3.8.1 # the version I want to invoke from my terminal
@@ -70,11 +81,11 @@ $ pyenv global 3.8.1
 This will save you from slow start up but also provide you with whatever Python version.
 The `script.sh` prepends `"$HOME"/.pyenv/shims` to your PATH so that it works with auto-initialization disabled. You would then run `init_pyenv` to have completions and all features.
 
-## Node
+## <a name="notes_nodejs"></a> Node.js
 Installs latest LTS release.
 
 
-# Extending
+# <a name="extending"></a> Extending
 
 Just create a function inside the `setup.sh` and the rest will work out of the box.
 
@@ -104,7 +115,7 @@ install_yourToolOfChoice() {
 If you're downloading a temporary file or need to distinguish between runs there is a four digit `$SEED`.
 
 
-# License
+# <a name="license"></a> License
 
 You are free to do anything with the software including modifying and redistributing. It will be nice if you credit me.
 
