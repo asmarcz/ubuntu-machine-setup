@@ -74,26 +74,34 @@ The `script.sh` prepends `"$HOME"/.pyenv/shims` to your PATH so that it works wi
 Installs latest LTS release.
 
 
-# How to extend
+# Extending
 
 Just create a function inside the `setup.sh` and the rest will work out of the box.
 
 ```
-...
 install_yourToolOfChoice() {
 	# download
 	# unpack
 	# clean up
 }
-...
 ```
 
-You can also use `APT_ARRAY` to have packages installed by apt at the very end of `script.sh`.
+If you need to have some APT packages or other packages installed before your script you can set dependencies.
 ```
+dependency_yourToolOfChoice() {
+	APT_ARRAY+=(package-in-repository) # for example linking dependency
+	register_dependency yourToolOfChoice git # git gets installed before yourToolOfChoice
+	register_dependency yourToolOfChoice rust # rust gets installed before yourToolOfChoice
+}
+
 install_yourToolOfChoice() {
-	APT_ARRAY+=(package-in-repository)
+	# clone repository
+	# build using rust
+	# clean up
 }
 ```
+
+If you're downloading a temporary file or need to distinguish between runs there is a four digit `$SEED`.
 
 
 # License
