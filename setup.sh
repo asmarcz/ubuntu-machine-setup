@@ -57,6 +57,7 @@ install_rust() {
 	rm $RUST
 	RUSTUP=$HOME/.cargo/bin/rustup
 	COMPLETION=$HOME/.local/share/bash-completion/completions
+	mkdir -p "$COMPLETION"
 	$RUSTUP completions bash > "$COMPLETION"/rustup
 	$RUSTUP completions bash cargo > "$COMPLETION"/cargo
 	RUST_INSTALLED=true
