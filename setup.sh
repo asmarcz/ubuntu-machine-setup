@@ -1,8 +1,10 @@
 #!/bin/bash
-HOME=/home/$SUDO_USER
+
+dependency_vim() {
+	APT_ARRAY+=(vim-gtk3)
+}
 
 install_vim() {
-	APT_ARRAY+=(vim-gtk3)
 	cat "$SCRIPT_DIR"/vim_config >> "$HOME"/.vimrc
 }
 
@@ -24,12 +26,12 @@ install_miniconda() {
 	fi
 }
 
-install_pyenv() {
+dependency_pyenv() {
 	# https://github.com/pyenv/pyenv/wiki/Common-build-problems 
 	APT_ARRAY+=(make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python-openssl git)
 }
 
-afterapt_pyenv() {
+install_pyenv() {
 	curl https://pyenv.run | bash
 	IS=$(grep -c '#pyenv-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -55,6 +57,7 @@ install_rust() {
 	rm $RUST
 	RUSTUP=$HOME/.cargo/bin/rustup
 	COMPLETION=$HOME/.local/share/bash-completion/completions
+	mkdir -p "$COMPLETION"
 	$RUSTUP completions bash > "$COMPLETION"/rustup
 	$RUSTUP completions bash cargo > "$COMPLETION"/cargo
 	RUST_INSTALLED=true
@@ -63,7 +66,7 @@ install_rust() {
 install_bat() {
 	IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
 	if [ "$IS_APT" -eq 1 ]; then
-		APT_ARRAY+=(bat)
+		sudo apt install -y bat
 	elif [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install bat
 	else
@@ -71,19 +74,21 @@ install_bat() {
 	fi
 }
 
-install_exa() {
-	if [ "$RUST_INSTALLED" = true ]; then
-		"$HOME"/.cargo/bin/cargo install exa
-	else
-		echo 'Could not install exa. Rust is not installed.' 1>&2
+dependency_exa() {
+	if [[ "$RUST_INSTALLED" = false ]]; then
+		register_dependency exa rust
 	fi
 }
 
-install_clang() {
+install_exa() {
+	"$HOME"/.cargo/bin/cargo install exa
+}
+
+dependency_clang() {
 	APT_ARRAY+=(clang make)
 }
 
-install_git() {
+dependency_git() {
 	APT_ARRAY+=(git)
 }
 
@@ -91,21 +96,22 @@ install_aliases() {
 	cat "$SCRIPT_DIR"/aliases >> "$HOME"/.bashrc
 }
 
-install_php() {
+dependency_php() {
 	APT_ARRAY+=(php-pear php-fpm php-dev php-zip php-curl php-xmlrpc php-gd php-mysql php-pgsql php-mbstring php-xml)
 }
 
-install_filezilla() {
+dependency_filezilla() {
 	APT_ARRAY+=(filezilla)
 }
 
 install_firefoxdev() {
 	FFDEV=ffdev$SEED
 	wget -O $FFDEV 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US'
-	tar -xjvf $FFDEV -C /opt
-	mv /opt/firefox /opt/firefox_dev
-	chgrp -R "$SUDO_USER" /opt/firefox_dev
-	chmod -R g+rwx /opt/firefox_dev
+	sudo tar -xjvf $FFDEV -C /opt
+	sudo mv /opt/firefox /opt/firefox_dev
+	sudo chgrp -R "$SUDO_USER" /opt/firefox_dev
+	sudo chmod -R g+rwx /opt/firefox_dev
+	mkdir -p "$HOME"/.local/share/applications
 	cp "$SCRIPT_DIR"/firefox_dev.desktop "$HOME"/.local/share/applications
 	rm $FFDEV
 }
@@ -113,7 +119,7 @@ install_firefoxdev() {
 install_vscode() {
 	CODE=vscode$SEED
 	wget -O $CODE 'https://go.microsoft.com/fwlink/?LinkID=760868'
-	dpkg -i $CODE
+	sudo dpkg -i $CODE
 	rm $CODE
 }
 
@@ -124,7 +130,7 @@ install_go() {
 	URL="${BASH_REMATCH[1]}"
 	GO=go$SEED
 	wget -O $GO "$URL"
-	tar -C /usr/local -xzf $GO
+	sudo tar -C /usr/local -xzf $GO
 	rm $GO
 	IS=$(grep -c '#go-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -134,11 +140,11 @@ install_go() {
 	fi
 }
 
-install_libmagic() {
+dependency_libmagic() {
 	APT_ARRAY+=(libmagic-dev)
 }
 
-install_shellcheck() {
+dependency_shellcheck() {
 	APT_ARRAY+=(shellcheck)
 }
 
@@ -165,13 +171,13 @@ install_node() {
 	URL="$SOURCE$BASE_URL$ARCHIVE"
 	NODE=node$SEED
 	wget -O $NODE "$URL"
-	tar -xJf $NODE -C /opt
+	sudo tar -xJf $NODE -C /opt
 	rm $NODE
 
 	REGEX='(.+)\.tar\.xz'
 	[[ "$ARCHIVE" =~ $REGEX ]]
-	mv /opt/"${BASH_REMATCH[1]}" /opt/node
-	chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
+	sudo mv /opt/"${BASH_REMATCH[1]}" /opt/node
+	sudo chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
 
 	IS=$(grep -c '#node-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
@@ -179,18 +185,23 @@ install_node() {
 	fi
 }
 
-install_nextcloud() {
-	add-apt-repository ppa:nextcloud-devs/client
+dependency_nextcloud() {
+	sudo add-apt-repository ppa:nextcloud-devs/client
 	APT_ARRAY+=(nextcloud-client)
 }
 
-install_qterminal() {
+dependency_qterminal() {
 	APT_ARRAY+=(qterminal)
+}
+
+install_qterminal() {
 	mkdir -p "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/*.schema "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/*.colorscheme "$HOME"/.config/qterminal.org/color-schemes
-	cp "$SCRIPT_DIR"/qterminal/qterminal.ini "$HOME"/.config/qterminal.org
-	chown -R "$SUDO_USER":"$SUDO_USER" "$HOME"/.config/qterminal.org
+	local FILE SRC DEST
+	SRC="$SCRIPT_DIR"/qterminal
+	DEST="$HOME"/.config/qterminal.org
+	cp "$SRC"/*.schema "$DEST"/color-schemes 2>/dev/null || :
+	cp "$SRC"/*.colorscheme "$DEST"/color-schemes 2>/dev/null || :
+	cp "$SRC"/qterminal.ini "$DEST" 2>/dev/null || :
 }
 
 install_jetbrainsmono() {
@@ -215,6 +226,17 @@ ask() {
 	read -rp "Install $1? [y/n] " YN
 	if [ "$YN" != "n" ]; then
 		install_"$1"
+		FULLFILLED[$(get_names_index "$EL")]=true
+	fi
+}
+
+ask_dep() {
+	read -rp "Install $1? [y/n] " YN
+	if [[ "$YN" != "n" ]]; then
+		dependency_"$1"
+		FULLFILLED_DEP[$(get_names_index "$EL")]=true
+	else
+		DECLINED_DEP[$(get_names_index "$EL")]=true
 	fi
 }
 
@@ -241,17 +263,35 @@ if [[ $# -gt 0 ]]; then
 	done
 fi
 
+get_names_index() {
+	local RET=-1
+	for (( I = 0; I < ${#NAMES[@]}; I++ )); do
+		if [[ "${NAMES[$I]}" = "$1" ]]; then
+			RET=$I
+			break
+		fi
+	done
+	echo $RET
+}
+
 populate_names() {
-	REGEX='install_([a-zA-Z0-9]+)'
+	INSTALL_REGEX='install_([a-zA-Z0-9]+)'
+	DEPENDENCY_REGEX='dependency_([a-zA-Z0-9]+)'
 	for EL in $(declare -F); do
-		if [[ $EL =~ $REGEX ]]; then
-			NAMES+=("${BASH_REMATCH[1]}")
+		if [[ "$EL" =~ $INSTALL_REGEX ]]; then
+			if [[ "$(get_names_index ${BASH_REMATCH[1]})" -eq -1 ]]; then
+				NAMES+=("${BASH_REMATCH[1]}")
+			fi
+		elif [[ "$EL" =~ $DEPENDENCY_REGEX ]]; then
+			if [[ "$(get_names_index ${BASH_REMATCH[1]})" -eq -1 ]]; then
+				NAMES+=("${BASH_REMATCH[1]}")
+			fi
 		fi
 	done
 }
 
 if [[ "$SHOWALL" = true ]]; then
-populate_names
+	populate_names
 	for TOOL in "${NAMES[@]}"; do
 		echo "$TOOL"
 	done
@@ -260,35 +300,95 @@ elif [[ "${#NAMES[@]}" -eq 0 ]]; then
 	populate_names
 fi
 
-if [[ "$(id -u)" -ne 0 ]]; then
-	echo 'You need to run this script with root privileges.' 1>&2
-	exit 1
-fi
+declare -a FULLFILLED_DEP
+declare -a FULLFILLED
+declare -a DEPENDENCIES
+declare -a DECLINED_DEP
 
-for EL in "${NAMES[@]}"; do
-	T=$(type -t "install_$EL")
-	if [[ "$T" = 'function' ]]; then
-		if [[ "$YES" = true ]]; then
-			install_"$EL"
-		else
-			ask "$EL"
-			if [[ "$BELL" = true ]]; then
-				paplay '/usr/share/sounds/freedesktop/stereo/complete.oga'
-			fi
-		fi
-	else
-		echo "$EL is not currently supported."
-	fi
+for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+	FULLFILLED_DEP[$I]=false
+	FULLFILLED[$I]=false
+	DEPENDENCIES[$I]=-1
+	DECLINED_DEP[$I]=false
 done
 
-if [ ${#APT_ARRAY[@]} -gt 0 ]; then
-	apt update
-	apt install -y "${APT_ARRAY[@]}"
+register_dependency() {
+	local DEP
+	DEP=$(get_names_index "$2")
+	if [[ "$DEP" -eq -1 ]]; then
+		DEP="${#NAMES[@]}"
+		NAMES+=("$2")
+		FULLFILLED_DEP+=(false)
+		FULLFILLED+=(false)
+		DEPENDENCIES+=(-1)
+		DECLINED_DEP+=(false)
+	fi
+	DEPENDENCIES[$(get_names_index "$1")]="$DEP"
+}
+
+go_through_dependencies() {
+	local RAN=false
+	for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+		EL="${NAMES[$I]}"
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = false && "${DECLINED_DEP[$I]}" = false ]]; then
+			if [[ "$YES" = true ]]; then
+				dependency_"$EL"
+				FULLFILLED_DEP[$I]=true
+			else
+				ask_dep "$EL"
+			fi
+			RAN=true
+		fi
+	done
+	if [[ "$RAN" = true ]]; then
+		go_through_dependencies
+	fi
+}
+
+go_through_dependencies
+
+if [[ ${#APT_ARRAY[@]} -gt 0 ]]; then
+	sudo apt update
+	sudo apt install -y "${APT_ARRAY[@]}"
 fi
 
-for EL in "${NAMES[@]}"; do
-	T=$(type -t "afterapt_$EL")
+BELL_FILE='/usr/share/sounds/freedesktop/stereo/complete.oga'
+
+process() {
+	local I="$1"
+	local EL="${NAMES[$I]}"
+	if [[ "${FULLFILLED[$I]}" = false ]]; then
+		if [[ "${DEPENDENCIES[$I]}" -ne -1 ]]; then
+			echo "Installing dependency ${NAMES[${DEPENDENCIES[$I]}]} for $EL."
+			process "${DEPENDENCIES[$I]}"
+		fi
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" = 'function' && "${FULLFILLED_DEP[$I]}" = true || "$T" != 'function' ]]; then
+			if [[ "$YES" = true || "${FULLFILLED_DEP[$I]}" = true ]]; then
+				install_"$EL"
+				FULLFILLED[$I]=true
+			else
+				ask "$EL"
+			fi
+			if [[ "$BELL" = true ]]; then
+				if [[ -f "$BELL_FILE" ]]; then
+					paplay "$BELL_FILE"
+				fi
+			fi
+		fi
+	fi
+}
+
+for (( I = 0; I < "${#NAMES[@]}"; I++ )); do
+	EL="${NAMES[$I]}"
+	T=$(type -t "install_$EL")
 	if [[ "$T" = 'function' ]]; then
-		afterapt_"$EL"
+		process $I
+	else
+		T=$(type -t "dependency_$EL")
+		if [[ "$T" != 'function' ]]; then
+			echo "$EL is not currently supported."
+		fi
 	fi
 done
