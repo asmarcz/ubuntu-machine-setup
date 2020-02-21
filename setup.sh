@@ -186,7 +186,7 @@ install_node() {
 }
 
 dependency_nextcloud() {
-	add-apt-repository ppa:nextcloud-devs/client
+	sudo add-apt-repository ppa:nextcloud-devs/client
 	APT_ARRAY+=(nextcloud-client)
 }
 
