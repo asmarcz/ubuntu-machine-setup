@@ -97,7 +97,7 @@ install_yourToolOfChoice() {
 }
 ```
 
-If you need to have some APT packages or other packages installed before your script you can set dependencies.
+If you need to have some APT packages or other tools installed before your script you can set dependencies.
 ```
 dependency_yourToolOfChoice() {
 	APT_ARRAY+=(package-in-repository) # for example linking dependency
