@@ -27,8 +27,6 @@ Then substitute the example files with yours:
 - `vim_config` is dumped into ~/.vimrc
 - all color schemes and config file for QTerminal are copied from qterminal (note that my config uses JetBrains Mono font)
 
-You need to run the script either using sudo or as a root.
-
 1. Run script as is and it will prompt you for all of the avaible tools.
 ```
 $ ./setup.sh 
