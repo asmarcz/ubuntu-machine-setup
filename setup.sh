@@ -109,7 +109,7 @@ install_firefoxdev() {
 	wget -O $FFDEV 'https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US'
 	sudo tar -xjvf $FFDEV -C /opt
 	sudo mv /opt/firefox /opt/firefox_dev
-	sudo chgrp -R "$SUDO_USER" /opt/firefox_dev
+	sudo chgrp -R "$USER" /opt/firefox_dev
 	sudo chmod -R g+rwx /opt/firefox_dev
 	mkdir -p "$HOME"/.local/share/applications
 	cp "$SCRIPT_DIR"/firefox_dev.desktop "$HOME"/.local/share/applications
@@ -177,7 +177,7 @@ install_node() {
 	REGEX='(.+)\.tar\.xz'
 	[[ "$ARCHIVE" =~ $REGEX ]]
 	sudo mv /opt/"${BASH_REMATCH[1]}" /opt/node
-	sudo chown -R "$SUDO_USER":"$SUDO_USER" /opt/node
+	sudo chown -R "$USER":"$USER" /opt/node
 
 	IS=$(grep -c '#node-ubuntu-machine-setup' "$HOME"/.profile)
 	if [[ "$IS" -eq 0 ]]; then
