@@ -63,14 +63,18 @@ install_rust() {
 	RUST_INSTALLED=true
 }
 
-install_bat() {
+dependency_bat() {
 	IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
 	if [ "$IS_APT" -eq 1 ]; then
-		sudo apt install -y bat
-	elif [ "$RUST_INSTALLED" = true ]; then
+		APT_ARRAY+=(bat)
+	elif [ "$RUST_INSTALLED" = false ]; then
+		register_dependency bat rust
+	fi
+}
+
+install_bat() {
+	if [ "$RUST_INSTALLED" = true ]; then
 		"$HOME"/.cargo/bin/cargo install bat
-	else
-		echo 'Could not install bat. It is neither in apt repository nor Rust is installed.' 1>&2
 	fi
 }
 
