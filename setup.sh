@@ -63,9 +63,9 @@ install_rust() {
 	RUST_INSTALLED=true
 }
 
+BAT_IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
 dependency_bat() {
-	IS_APT=$(apt-cache search --names-only '^bat$' | wc -l)
-	if [ "$IS_APT" -eq 1 ]; then
+	if [ "$BAT_IS_APT" -eq 1 ]; then
 		APT_ARRAY+=(bat)
 	elif [ "$RUST_INSTALLED" = false ]; then
 		register_dependency bat rust
@@ -73,7 +73,7 @@ dependency_bat() {
 }
 
 install_bat() {
-	if [ "$RUST_INSTALLED" = true ]; then
+	if [ "$BAT_IS_APT" -ne 1 ]; then
 		"$HOME"/.cargo/bin/cargo install bat
 	fi
 }
