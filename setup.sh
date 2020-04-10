@@ -97,7 +97,8 @@ dependency_clang-static-analyzer() {
 }
 
 install_clangstaticanalyzer() {
-	cp "$SCRIPT_DIR"/analyze.sh "$HOME"/.local/bin
+	cp "$SCRIPT_DIR"/analyze.sh "$HOME"/.local/bin/analyze
+	chmod u+x "$HOME"/.local/bin/analyze
 }
 
 dependency_git() {
