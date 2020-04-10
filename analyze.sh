@@ -1,4 +1,4 @@
-#!/bin/dash
+#!/bin/sh
 DIR=/tmp/scan-build
 OBJECT_FILE=/tmp/scan.o
 
