@@ -92,6 +92,14 @@ dependency_clang() {
 	APT_ARRAY+=(clang make)
 }
 
+dependency_clang-static-analyzer() {
+	APT_ARRAY+=(clang-tools)
+}
+
+install_clangstaticanalyzer() {
+	cp "$SCRIPT_DIR"/analyze.sh "$HOME"/.local/bin
+}
+
 dependency_git() {
 	APT_ARRAY+=(git)
 }
