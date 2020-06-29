@@ -6,6 +6,7 @@ dependency_vim() {
 
 install_vim() {
 	cat "$SCRIPT_DIR"/vim_config >> "$HOME"/.vimrc
+	mkdir -p "$HOME"/.vim/swp
 }
 
 install_miniconda() {
