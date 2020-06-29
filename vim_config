@@ -5,4 +5,7 @@ set number
 set autoindent
 set ruler
 set title
-set background=light
+set background=dark
+set directory^=$HOME/.vim/swp//
+set ignorecase
+set smartcase
