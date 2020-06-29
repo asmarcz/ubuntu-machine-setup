@@ -1,23 +1,41 @@
 alias s="du -h --max-depth=1 | sort -h"
-alias ..="cd .."
 alias ll="exa -lga"
 alias lg="exa -lga --git"
 alias bat="bat --theme=ansi-light"
 
-srv() {
-	if [ $# -eq 0 ]
-		then
-			php -S localhost:8000
-	else
-		php -S localhost:$1
-	fi
+rascii() {
+	asciidoctor -b manpage -o - "$1" | man -l -
 }
 
-srvg() {
-	if [ $# -eq 0 ]
-		then
-			php -S 0.0.0.0:8000
-	else
-		php -S 0.0.0.0:$1
+..() {
+	local N PREVPWD
+	N=1
+	PREVPWD="$PWD"
+	if [[ $# -eq 1 ]]; then
+		N=$1
 	fi
+	for (( I = 0; I < $N; I++ )); do
+		cd ..
+	done
+	OLDPWD="$PREVPWD"
+}
+
+srv() {
+	local HOST PORT DOCROOT ROUTER
+	HOST="localhost"
+	PORT="8000"
+	DOCROOT="."
+	ROUTER=""
+	for ARG in "$@"; do
+		if [[ "$ARG" = "-g" ]]; then
+			HOST="0.0.0.0"
+		elif [[ "$ARG" =~ ^[0-9]+$ ]]; then
+			PORT="$ARG"
+		elif [[ -d "$ARG" ]]; then
+			DOCROOT="$ARG"
+		elif [[ -f "$ARG" ]]; then
+			ROUTER="$ARG"
+		fi
+	done
+	php -S "$HOST":"$PORT" -t "$DOCROOT" $ROUTER
 }
