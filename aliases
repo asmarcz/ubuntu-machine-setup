@@ -39,3 +39,22 @@ srv() {
 	done
 	php -S "$HOST":"$PORT" -t "$DOCROOT" $ROUTER
 }
+
+short_pwd() {
+	local RE
+	
+	RE="(~?)(\/.*)?(\/[^\/]+)"
+	[[ "$(dirs)" =~ $RE ]]
+	[ -z "${BASH_REMATCH}" ] && exit
+	printf ":${BASH_REMATCH[1]}"
+	REST="${BASH_REMATCH[2]}"
+	LAST="${BASH_REMATCH[3]}"
+
+	RE="(\/.)[^\/]+"
+	while [[ "$REST" =~ $RE ]]; do
+		printf "${BASH_REMATCH[1]}"
+		REST="${REST#*$BASH_REMATCH}"
+	done
+
+	echo "$LAST"
+}
