@@ -23,14 +23,14 @@ git clone --depth=1 https://github.com/asmarcz/ubuntu-machine-setup
 ```
 
 Then substitute the example files with yours:
-- `alises` is dumped into ~/.bashrc
+- `.bashrc` is dumped into ~/.bashrc
 - `vim_config` is dumped into ~/.vimrc
 - all color schemes and config file for QTerminal are copied from qterminal (note that my config uses JetBrains Mono font)
 
 1. Run script as is and it will prompt you for all of the avaible tools.
 ```
 $ ./setup.sh 
-Install aliases? [y/n]
+Install bashrc? [y/n]
 ...
 ```
 
@@ -59,8 +59,8 @@ $ ./setup.sh -y -b
 List all available tools:
 ```
 $ ./setup.sh --show-all
-aliases
 bat
+clang
 ...
 ```
 

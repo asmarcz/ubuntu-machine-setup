@@ -106,8 +106,8 @@ dependency_git() {
 	APT_ARRAY+=(git)
 }
 
-install_aliases() {
-	cat "$SCRIPT_DIR"/aliases >> "$HOME"/.bashrc
+install_bashrc() {
+	cat "$SCRIPT_DIR"/.bashrc >> "$HOME"/.bashrc
 }
 
 dependency_php() {
