@@ -43,15 +43,15 @@ srv() {
 short_pwd() {
 	local RE
 	
+	DIR="$(dirs)"
 	RE="(\/.*)?(\/[^\/]+)"
-	[[ "$(dirs)" =~ $RE ]]
+	[[ "$DIR" =~ $RE ]]
 	if [ -z "${BASH_REMATCH}" ]; then
-		if [ "$(dirs)" = "/" ]; then
-			printf ":/"
-		fi
+		[ "$DIR" = "/" ] && printf ":/"
 		exit
 	fi
 	printf ":"
+	[ "${DIR:0:1}" = "~" ] && printf "~"
 	REST="${BASH_REMATCH[1]}"
 	LAST="${BASH_REMATCH[2]}"
 
