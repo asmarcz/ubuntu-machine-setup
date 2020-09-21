@@ -48,7 +48,7 @@ short_pwd() {
 	[[ "$DIR" =~ $RE ]]
 	if [ -z "${BASH_REMATCH}" ]; then
 		[ "$DIR" = "/" ] && printf ":/"
-		exit
+		return
 	fi
 	printf ":"
 	[ "${DIR:0:1}" = "~" ] && printf "~"
