@@ -21,7 +21,7 @@ rascii() {
 }
 
 srv() {
-	local HOST PORT DOCROOT ROUTER
+	local HOST PORT DOCROOT ROUTER ARG
 	HOST="localhost"
 	PORT="8000"
 	DOCROOT="."
