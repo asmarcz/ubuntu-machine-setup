@@ -63,3 +63,56 @@ short_pwd() {
 
 	echo "$LAST"
 }
+
+# ex - extract archive to enclosing directory inside current directory
+# usage: ex [--mix|-m] <file> [files...]
+ex() {
+	local ARG DIR EXT MIX
+	MIX=0
+	for ARG in "$@"; do
+		if [[ "$ARG" = "--mix" || "$ARG" = "-m" ]]; then
+			MIX=1
+			break
+		fi
+	done
+	for ARG in "$@"; do
+		if [ -f "$ARG" ]; then
+			case "$ARG" in
+				*.tar.bz2)   EXT=.tar.bz2                ;;
+				*.tar.gz)    EXT=.tar.gz                 ;;
+				*.tar.xz)    EXT=.tar.xz                 ;;
+				*.bz2)       bunzip2 $ARG && continue    ;;
+				*.rar)       EXT=.rar                    ;;
+				*.gz)        gunzip $ARG && continue     ;;
+				*.tar)       EXT=.tar                    ;;
+				*.tbz2)      EXT=.tbz2                   ;;
+				*.tgz)       EXT=.tgz                    ;;
+				*.zip)       EXT=.zip                    ;;
+				*.zst)       unzstd $ARG && continue     ;;
+				*.Z)         uncompress $ARG && continue ;;
+				*.7z)        EXT=.7z                     ;;
+				*)           echo "Skipping $ARG: cannot be extracted via ex()" && continue ;;
+			esac
+			DIR="$(basename "$ARG")"
+			DIR="${DIR%"$EXT"}"
+			if [ $MIX -eq 0 ]; then
+				if [ -d "$DIR" ]; then
+					echo "Skipping $ARG: $DIR exists and mixing is not enabled."
+					continue
+				fi
+			fi
+			mkdir -p "$DIR"
+			case "$EXT" in
+				.tar.bz2)   tar xjf $ARG -c "$DIR" ;;
+				.tar.gz)    tar xzf $ARG -c "$DIR" ;;
+				.tar.xz)    tar xJf $ARG -c "$DIR" ;;
+				.rar)       unrar $ARG -o "$DIR"   ;;
+				.tar)       tar xf $ARG -c "$DIR"  ;;
+				.tbz2)      tar xjf $ARG -c "$DIR" ;;
+				.tgz)       tar xzf $ARG -c "$DIR" ;;
+				.zip)       unzip "$ARG" -d "$DIR" ;;
+				.7z)        7z x "$ARG" -o"$DIR"   ;;
+			esac
+		fi
+	done
+}
